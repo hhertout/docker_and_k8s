@@ -1,4 +1,7 @@
-# Observability docker compose
+<p align="center">
+<img src="../.github/assets/grafana.png" align="center" width="500" />
+    <h1 align="center">Grafana stack</h1>
+</p>
 
 This repository contains a Docker Compose configuration to quickly set up a complete observability stack using Grafana. It includes all necessary components to monitor, visualize, and analyze your application's performance and logs. By following the instructions below, you can have a fully functional observability environment up and running in no time.
 

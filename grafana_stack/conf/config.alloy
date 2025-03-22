@@ -3,6 +3,10 @@ logging {
   format = "logfmt"
 }
 
+// add server config
+
+// add storage config
+
 pyroscope.receive_http "default" {
    http {
        listen_address = "0.0.0.0"

@@ -1,0 +1,14 @@
+services:
+  k6:
+    build:
+      context: .
+      dockerfile: .docker/k6.dockerfile
+    environment:
+      - K6_OTEL_EXPORTER_TYPE=grpc
+      - K6_OTEL_GRPC_EXPORTER_ENDPOINT=otel-collector:4317
+      - K6_OTEL_GRPC_EXPORTER_INSECURE=true
+      - K6_OTEL_HTTP_EXPORTER_ENDPOINT=otel-collector:4318
+      - K6_OTEL_HTTP_EXPORTER_INSECURE=true
+      - DOCKER_DEFAULT_PLATFORM=linux/amd64
+    volumes:
+      - ./:/tests

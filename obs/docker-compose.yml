@@ -1,0 +1,128 @@
+x-logging: &default-logging
+  driver: loki
+  options:
+    loki-url: http://host.docker.internal:3100/loki/api/v1/push
+    mode: non-blocking
+    max-size: "10m"
+    max-file: "3"
+    loki-retries: "0"
+    loki-timeout: "1s"
+    keep-file: "true"
+
+services:
+  alloy:
+    image: grafana/alloy:latest
+    volumes:
+      - ./conf/config.alloy:/etc/alloy/config.alloy
+    ports:
+      - "12345:12345"
+      - "9999:9999"
+      - "9998:9998"
+    command: "run --server.http.listen-addr=0.0.0.0:12345 --storage.path=/var/lib/alloy/data /etc/alloy/config.alloy --stability.level public-preview"
+
+  otel-gateway:
+    image: otel/opentelemetry-collector-contrib:latest
+    command: ["--config=/etc/otel-collector-config.yaml"]
+    volumes:
+      - ./conf/otel-collector-config.yaml:/etc/otel-collector-config.yaml
+    ports:
+      - "4317:4317" # GRPC endpoint
+      - "4318:4318" # HTTP endpoint
+    depends_on:
+      - mimir
+      - loki
+      - tempo
+
+  mimir:
+    image: grafana/mimir:2.13.0
+    command:
+      [
+        "-ingester.native-histograms-ingestion-enabled=true",
+        "-config.file=/etc/mimir.yaml",
+      ]
+    # ports:
+    #   - "9009:9009"
+    volumes:
+      - "./conf/mimir.yaml:/etc/mimir.yaml"
+    logging: *default-logging
+
+  loki:
+    image: grafana/loki:3.4
+    command: ["-config.file=/etc/loki/loki.yaml"]
+    ports:
+      - "3100:3100"
+    volumes:
+      - "./conf/loki.yaml:/etc/loki/loki.yaml"
+      - data_loki:/loki:rw
+    logging: *default-logging
+
+  grafana:
+    image: grafana/grafana:latest
+    environment:
+      - GF_FEATURE_TOGGLES_ENABLE=flameGraph traceqlSearch correlations traceQLStreaming metricsSummary traceqlEditor traceToMetrics traceToProfiles datatrails
+      - GF_INSTALL_PLUGINS=grafana-lokiexplore-app,grafana-exploretraces-app,grafana-pyroscope-app
+      - GF_AUTH_ANONYMOUS_ENABLED=true
+      - GF_AUTH_ANONYMOUS_ORG_ROLE=Admin
+      - GF_AUTH_DISABLE_LOGIN_FORM=true
+    volumes:
+      - "grafana-data:/var/lib/grafana"
+      - "./grafana/definitions:/var/lib/grafana/dashboards"
+      - "./grafana/provisioning:/etc/grafana/provisioning"
+    ports:
+      - "3000:3000"
+    depends_on:
+      - mimir
+      - loki
+    user: root
+    logging: *default-logging
+
+  tempo:
+    image: grafana/tempo:2.6.0
+    # ports:
+    #   - "3200:3200"
+    #   - "55680:55680"
+    #   - "55681:55681"
+    #   - "14250:14250"
+    command: ["-config.file=/etc/tempo.yaml"]
+    volumes:
+      - "./conf/tempo.yaml:/etc/tempo.yaml"
+    logging: *default-logging
+
+  pyroscope:
+    image: grafana/pyroscope:1.8.0
+    ports:
+      - "4040:4040"
+    command: ["server"]
+    logging: *default-logging
+
+  # node_exporter:
+  #   image: prom/node-exporter:latest
+  #   command:
+  #     - "--path.rootfs=/host"
+  #     - "--no-collector.filesystem"
+  #   pid: host
+  #   volumes:
+  #     - "/proc:/host/proc:ro"
+  #     - "/sys:/host/sys:ro"
+
+  cadvisor:
+    image: gcr.io/cadvisor/cadvisor:latest
+    container_name: cadvisor
+    privileged: true
+    ports:
+      - "8080:8080"
+    devices:
+      - /dev/kmsg:/dev/kmsg
+    volumes:
+      - /:/rootfs:ro
+      - /var/run:/var/run:ro
+      - /sys:/sys:ro
+      - /var/lib/docker:/var/lib/docker:ro
+      - /dev/disk/:/dev/disk:ro
+    restart: unless-stopped
+    logging: *default-logging
+
+volumes:
+  grafana-data:
+  data_loki:
+    driver: local

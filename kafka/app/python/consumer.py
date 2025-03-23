@@ -3,7 +3,7 @@ from confluent_kafka import Consumer, KafkaException
 consumer = Consumer({
     'bootstrap.servers': 'localhost:9092',
     'group.id': 'python-consumer-group',
-    'auto.offset.reset': 'earliest'
+    'auto.offset.reset': 'latest' # 'earliest'
 })
 consumer.subscribe(["test-topic"])
 print("🔌 Successfully connected to kafka")

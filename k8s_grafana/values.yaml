@@ -1,0 +1,87 @@
+grafana:
+  name: grafana
+  kind: Deployment
+  specs:
+    container_name: grafana
+    image: grafana/grafana:latest
+    port: 3000
+    exposed_port: 3000
+  volume:
+    name: grafana-pvc
+    storage: 1Gi
+  ingress:
+    host: grafana.home.local
+  hpa:
+    min: 1
+    max: 1
+    cpu: 120
+    memory: 120
+  env:
+    - name: GF_FEATURE_TOGGLES_ENABLE
+      value: flameGraph traceqlSearch correlations traceQLStreaming metricsSummary traceqlEditor traceToMetrics traceToProfiles datatrails
+    - name: GF_INSTALL_PLUGINS
+      value: grafana-lokiexplore-app,grafana-exploretraces-app,grafana-pyroscope-app
+    - name: GF_SERVER_ROOT_URL
+      value: http://grafana.home.local
+    - name: GF_SERVER_PROTOCOL
+      value: http
+    - name: GF_SERVER_DOMAIN
+      value: grafana.home.local
+
+mimir:
+  name: mimir
+  kind: Deployment
+  specs:
+    container_name: mimir
+    image: grafana/mimir:2.15.1
+    port: 9009
+    exposed_port: 9009
+  hpa:
+    min: 1
+    max: 1
+    cpu: 120
+    memory: 120
+
+tempo:
+  name: tempo
+  kind: Deployment
+  specs:
+    container_name: tempo
+    image: grafana/tempo:2.7.1
+    port: 3200
+    exposed_port: 3200
+  hpa:
+    min: 1
+    max: 1
+    cpu: 120
+    memory: 120
+
+loki:
+  name: loki
+  kind: Deployment
+  specs:
+    container_name: loki
+    image: grafana/loki:3.4
+    port: 3100
+    exposed_port: 3100
+  hpa:
+    min: 1
+    max: 1
+    cpu: 120
+    memory: 120
+
+pyroscope:
+  name: loki
+  kind: Deployment
+  specs:
+    container_name: loki
+    image: grafana/pyroscope:1.8.0
+    port: 4040
+    exposed_port: 4040
+  hpa:
+    min: 1
+    max: 1
+    cpu: 120
+    memory: 120
+
+alloy:

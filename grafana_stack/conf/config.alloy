@@ -7,6 +7,8 @@ logging {
 
 // add storage config
 
+// add faro config
+
 pyroscope.receive_http "default" {
    http {
        listen_address = "0.0.0.0"

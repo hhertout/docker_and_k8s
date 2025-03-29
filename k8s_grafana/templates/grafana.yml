@@ -1,0 +1,57 @@
+apiVersion: apps/v1
+kind: {{.Values.grafana.kind}}
+metadata:
+  name: {{.Values.grafana.name}}-deployment
+  labels:
+    app: {{.Values.grafana.name}}
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: {{.Values.grafana.name}}
+  template:
+    metadata:
+      labels:
+        app: {{.Values.grafana.name}}
+    spec:
+      securityContext:
+        fsGroup: 472
+        supplementalGroups:
+          - 0
+      containers:
+        - name: {{.Values.grafana.specs.container_name}}
+          image: {{.Values.grafana.specs.image}}
+          deploymentStrategy:
+            type: RollingUpdate
+          ports:
+            - containerPort: {{.Values.grafana.specs.port}}
+          env: {{- range .Values.grafana.env }}
+            - name: {{.name}}
+              valie: {{.value}}
+          {{- end }}
+          resources:
+            limits:
+              cpu: "100m"
+              memory: "300Mi"
+            requests:
+              cpu: "50m"
+              memory: "80Mi"
+          imagePullPolicy: IfNotPresent
+          readinessProbe:
+            httpGet:
+                path: /api/health
+                port: 3000
+          livenessProbe:
+            httpGet:
+                path: /api/health
+                port: 3000
+            initialDelaySeconds: 60
+            timeoutSeconds: 30
+            failureThreshold: 10
+          volumeMounts:
+            - mountPath: /var/lib/grafana
+              name: {{.Values.grafana.name}}-pv
+      volumes:
+        - name: {{.Values.grafana.name}}-pv
+          persistentVolumeClaim:
+            claimName: {{.Values.grafana.volume.name}}

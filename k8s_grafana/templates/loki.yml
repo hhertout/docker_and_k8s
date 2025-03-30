@@ -1,7 +1,7 @@
 apiVersion: apps/v1
 kind: {{ .Values.loki.kind }}
 metadata:
-  name: {{.Values.loki.name}}-statefullset
+  name: {{.Values.loki.name}}
 spec:
   replicas: {{.Values.loki.replicas}}
   selector:

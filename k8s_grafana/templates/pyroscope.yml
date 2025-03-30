@@ -1,7 +1,7 @@
 apiVersion: apps/v1
 kind: {{ .Values.pyroscope.kind }}
 metadata:
-  name: {{.Values.pyroscope.name}}-statefullset
+  name: {{.Values.pyroscope.name}}
 spec:
   replicas: {{.Values.pyroscope.replicas}}
   selector:

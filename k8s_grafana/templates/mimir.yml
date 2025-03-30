@@ -1,7 +1,7 @@
 apiVersion: apps/v1
 kind: {{ .Values.mimir.kind }}
 metadata:
-  name: {{.Values.mimir.name}}-statefullset
+  name: {{.Values.mimir.name}}
 spec:
   replicas: {{.Values.mimir.replicas}}
   selector:

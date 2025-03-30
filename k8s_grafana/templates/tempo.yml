@@ -1,7 +1,7 @@
 apiVersion: apps/v1
 kind: {{ .Values.tempo.kind }}
 metadata:
-  name: {{.Values.tempo.name}}-statefullset
+  name: {{.Values.tempo.name}}
 spec:
   replicas: {{.Values.tempo.replicas}}
   selector:

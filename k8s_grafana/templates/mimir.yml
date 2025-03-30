@@ -1,0 +1,38 @@
+apiVersion: apps/v1
+kind: {{ .Values.mimir.kind }}
+metadata:
+  name: {{.Values.mimir.name}}-statefullset
+spec:
+  replicas: {{.Values.mimir.replicas}}
+  selector:
+    matchLabels:
+      app: {{.Values.mimir.name}}
+  template:
+    metadata:
+      labels:
+        app: {{.Values.mimir.name}}
+    spec:
+      containers:
+        - name: {{.Values.mimir.specs.container_name}}
+          image: {{.Values.mimir.specs.image}}
+          ports:
+            - containerPort: {{.Values.mimir.specs.container_port}}
+          args: {{- range .Values.mimir.args}}
+            - {{.value}}
+            {{- end}}
+          resources:
+            limits:
+              cpu: "100m"
+              memory: "300Mi"
+            requests:
+              cpu: "50m"
+              memory: "80Mi"
+          imagePullPolicy: IfNotPresent
+          volumeMounts:
+            - name: {{.Values.mimir.volume.config.name}}
+              mountPath: {{.Values.mimir.volume.config.path}}
+              subPath: {{.Values.mimir.volume.config.subPath}}
+      volumes:
+        - name: {{.Values.mimir.volume.config.name}}
+          configMap:
+            name: {{.Values.mimir.volume.config.configMap}}

@@ -1,0 +1,12 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ .Values.pyroscope.name }}-service
+spec:
+  type: ClusterIP
+  selector:
+    app: {{ .Values.pyroscope.name }}
+  ports:
+    - protocol: TCP
+      port: {{ .Values.pyroscope.specs.exposed_port }}
+      targetPort: {{ .Values.pyroscope.specs.container_port }}

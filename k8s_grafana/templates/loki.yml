@@ -1,0 +1,38 @@
+apiVersion: apps/v1
+kind: {{ .Values.loki.kind }}
+metadata:
+  name: {{.Values.loki.name}}-statefullset
+spec:
+  replicas: {{.Values.loki.replicas}}
+  selector:
+    matchLabels:
+      app: {{.Values.loki.name}}
+  template:
+    metadata:
+      labels:
+        app: {{.Values.loki.name}}
+    spec:
+      containers:
+        - name: {{.Values.loki.specs.container_name}}
+          image: {{.Values.loki.specs.image}}
+          ports:
+            - containerPort: {{.Values.loki.specs.container_port}}
+          args: {{- range .Values.loki.args}}
+            - {{.value}}
+            {{- end}}
+          resources:
+            limits:
+              cpu: "100m"
+              memory: "300Mi"
+            requests:
+              cpu: "50m"
+              memory: "80Mi"
+          imagePullPolicy: IfNotPresent
+          volumeMounts:
+            - name: {{.Values.loki.volume.config.name}}
+              mountPath: {{.Values.loki.volume.config.path}}
+              subPath: {{.Values.loki.volume.config.subPath}}
+      volumes:
+        - name: {{.Values.loki.volume.config.name}}
+          configMap:
+            name: {{.Values.loki.volume.config.configMap}}

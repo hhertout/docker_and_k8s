@@ -1,0 +1,7 @@
+provider:
+  name: letsencrypt
+  server: https://acme-v02.api.letsencrypt.org/directory
+  secret_name: letsencrypt-secret
+
+ingress_class_name: nginx
+secret_name: cloudflare-token-secret

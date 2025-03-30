@@ -1,0 +1,53 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ .Values.grafana_provisioning.volume.config.configMap }}
+  labels:
+    app: {{ .Values.grafana_provisioning.name }}
+data:
+  datasources.yaml: |
+    apiVersion: 1
+
+    datasources:
+      - name: Loki
+        type: loki
+        access: proxy
+        uid: loki
+        url: http://loki-service:3100
+
+      - name: Tempo
+        type: tempo
+        access: proxy
+        uid: tempo
+        url: http://tempo-service:3200
+        jsonData:
+          nodeGraph:
+            enabled: true
+          serviceMap:
+            datasourceUid: "Mimir"
+          tracesToLogs:
+            datasourceUid: loki
+            filterByTraceID: false
+            spanEndTimeShift: "500ms"
+            spanStartTimeShift: "-500ms"
+            tags: ["beast"]
+
+      - name: Mimir
+        type: prometheus
+        access: proxy
+        uid: mimir
+        url: http://mimir-service:9009/prometheus
+        jsonData:
+          exemplarTraceIdDestinations:
+            - datasourceUid: tempo
+              name: traceID
+        httpMethod: POST
+        timeInterval: "2s"
+
+      - name: Pyroscope
+        type: phlare
+        access: proxy
+        uid: pyroscope
+        url: http://pyroscope-service:4040
+        jsonData:
+          backendType: pyroscope

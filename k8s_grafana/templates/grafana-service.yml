@@ -9,4 +9,4 @@ spec:
   ports:
     - protocol: TCP
       port: {{ .Values.grafana.specs.exposed_port }}
-      targetPort: {{ .Values.grafana.specs.port }}
+      targetPort: {{ .Values.grafana.specs.container_port }}

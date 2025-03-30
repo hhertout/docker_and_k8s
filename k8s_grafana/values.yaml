@@ -1,16 +1,21 @@
+tls:
+  cert_manager:
+    issuer: letsencrypt-issuer
+
 grafana:
   name: grafana
   kind: Deployment
   specs:
+    replicas: 1
     container_name: grafana
     image: grafana/grafana:latest
-    port: 3000
+    container_port: 3000
     exposed_port: 3000
   volume:
     name: grafana-pvc
     storage: 1Gi
   ingress:
-    host: grafana.home.local
+    host: grafana.neryolab.com
   hpa:
     min: 1
     max: 1
@@ -28,14 +33,31 @@ grafana:
     - name: GF_SERVER_DOMAIN
       value: grafana.home.local
 
+grafana_provisioning:
+  volume:
+    config:
+      name: grafana-provisioning-conf
+      configMap: grafana-provisioning-config
+      path: /etc/grafana/provisioning/datasources/datasources.yaml
+      subPath: datasources.yaml
+
 mimir:
   name: mimir
-  kind: Deployment
+  kind: StatefulSet
   specs:
     container_name: mimir
     image: grafana/mimir:2.15.1
-    port: 9009
+    args:
+      - value: "-ingester.native-histograms-ingestion-enabled=true"
+      - value: "-config.file=/etc/mimir.yaml"
+    container_port: 9009
     exposed_port: 9009
+  volume:
+    config:
+      name: mimir-config
+      configMap: mimir-config
+      path: /etc/mimir.yaml
+      subPath: mimir.yaml
   hpa:
     min: 1
     max: 1
@@ -44,12 +66,21 @@ mimir:
 
 tempo:
   name: tempo
-  kind: Deployment
+  kind: StatefulSet
   specs:
     container_name: tempo
     image: grafana/tempo:2.7.1
-    port: 3200
+    container_port: 3200
     exposed_port: 3200
+    args:
+      - value: "-config.file=/etc/tempo.yaml"
+      - value: "-log.level=debug"
+  volume:
+    config:
+      name: tempo-config
+      configMap: tempo-config
+      path: /etc/tempo.yaml
+      subPath: tempo.yaml
   hpa:
     min: 1
     max: 1
@@ -58,12 +89,20 @@ tempo:
 
 loki:
   name: loki
-  kind: Deployment
+  kind: StatefulSet
   specs:
     container_name: loki
     image: grafana/loki:3.4
-    port: 3100
+    container_port: 3100
     exposed_port: 3100
+    args:
+      - value: "-config.file=/etc/loki.yaml"
+  volume:
+    config:
+      name: loki-config
+      configMap: loki-config
+      path: /etc/loki.yaml
+      subPath: loki.yaml
   hpa:
     min: 1
     max: 1
@@ -71,12 +110,12 @@ loki:
     memory: 120
 
 pyroscope:
-  name: loki
-  kind: Deployment
+  name: pyroscope
+  kind: StatefulSet
   specs:
-    container_name: loki
+    container_name: pyroscope
     image: grafana/pyroscope:1.8.0
-    port: 4040
+    container_port: 4040
     exposed_port: 4040
   hpa:
     min: 1

@@ -5,7 +5,7 @@ metadata:
   labels:
     app: {{.Values.grafana.name}}
 spec:
-  replicas: 2
+  replicas: {{.Values.grafana.replicas}}
   selector:
     matchLabels:
       app: {{.Values.grafana.name}}
@@ -21,18 +21,16 @@ spec:
       containers:
         - name: {{.Values.grafana.specs.container_name}}
           image: {{.Values.grafana.specs.image}}
-          deploymentStrategy:
-            type: RollingUpdate
           ports:
-            - containerPort: {{.Values.grafana.specs.port}}
+            - containerPort: {{.Values.grafana.specs.container_port}}
           env: {{- range .Values.grafana.env }}
             - name: {{.name}}
-              valie: {{.value}}
+              value: {{.value}}
           {{- end }}
           resources:
             limits:
-              cpu: "100m"
-              memory: "300Mi"
+              cpu: "500m"
+              memory: "200Mi"
             requests:
               cpu: "50m"
               memory: "80Mi"
@@ -51,7 +49,13 @@ spec:
           volumeMounts:
             - mountPath: /var/lib/grafana
               name: {{.Values.grafana.name}}-pv
+            - name: {{.Values.grafana_provisioning.volume.config.name}}
+              mountPath: {{.Values.grafana_provisioning.volume.config.path}}
+              subPath: {{.Values.grafana_provisioning.volume.config.subPath}}
       volumes:
         - name: {{.Values.grafana.name}}-pv
           persistentVolumeClaim:
             claimName: {{.Values.grafana.volume.name}}
+        - name: {{.Values.grafana_provisioning.volume.config.name}}
+          configMap:
+            name: {{.Values.grafana_provisioning.volume.config.configMap}}

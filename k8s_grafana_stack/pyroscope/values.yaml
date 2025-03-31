@@ -1,0 +1,13 @@
+pyroscope:
+  name: pyroscope
+  kind: StatefulSet
+  specs:
+    container_name: pyroscope
+    image: grafana/pyroscope:1.8.0
+    container_port: 4040
+    exposed_port: 4040
+  hpa:
+    min: 1
+    max: 1
+    cpu: 120
+    memory: 120

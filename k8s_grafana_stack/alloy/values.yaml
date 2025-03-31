@@ -1,0 +1,36 @@
+alloy:
+  name: alloy
+  kind: StatefulSet
+  specs:
+    replicas: 1
+    container_name: alloy
+    image: grafana/alloy:2.15.1
+    args:
+      - value: "-ingester.native-histograms-ingestion-enabled=true"
+      - value: "-config.file=/etc/alloy.yaml"
+    ports:
+      - port: 9998
+        protocol: TCP
+        exposed_port: 9998
+        name: http
+      - port: 9999
+        protocol: TCP
+        exposed_port: 9999
+        name: grpc
+      - port: 12345
+        protocol: TCP
+        exposed_port: 12345
+        name: grpc
+  volume:
+    config:
+      name: alloy-config
+      configMap: alloy-config
+      path: /etc/alloy/config.alloy
+      subPath: config.alloy
+  hpa:
+    min: 1
+    max: 1
+    cpu: 120
+    memory: 120
+
+config:

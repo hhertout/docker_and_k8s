@@ -19,7 +19,7 @@ data:
         type: tempo
         access: proxy
         uid: tempo
-        url: http://tempo-service:3200
+        url: http://tempo-service:3100
         jsonData:
           nodeGraph:
             enabled: true

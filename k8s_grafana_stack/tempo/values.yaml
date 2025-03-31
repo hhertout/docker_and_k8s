@@ -1,0 +1,119 @@
+tempo:
+  name: tempo
+  kind: StatefulSet
+  specs:
+    replicas: 1
+    container_name: tempo
+    image: grafana/tempo:2.7.1
+    ports:
+      - port: 3100
+        protocol: TCP
+        exposed_port: 3100
+        name: api
+      - port: 4317
+        protocol: TCP
+        exposed_port: 4317
+        name: grpc
+      - port: 4318
+        protocol: TCP
+        exposed_port: 4318
+        name: http
+    args:
+      - value: "-config.file=/etc/tempo.yaml"
+  volume:
+    config:
+      name: tempo-config
+      configMap: tempo-config
+      path: /etc/tempo.yaml
+      subPath: tempo.yaml
+    override:
+      name: override-config
+      configMap: tempo-config
+      path: /conf/overrides.yaml
+      subPath: overrides.yaml
+  hpa:
+    min: 1
+    max: 1
+    cpu: 120
+    memory: 120
+
+config:
+  memBallastSizeMbs: 1024
+  multitenancyEnabled: false
+  reportingEnabled: false
+  metricsGenerator:
+    enabled: true
+    remoteWriteUrl: "http://mimir-service:9002/api/v1/write"
+  ingester:
+    flush_check_period: 10s
+    trace_idle_period: 10s
+    max_block_duration: 30m
+    complete_block_timeout: 1h
+  querier:
+    max_concurrent_queries: 20
+  queryFrontend:
+   search:
+     concurrent_jobs: 2000
+  retention: 24h
+  overrides:
+    defaults:
+     metrics_generator:
+       processors:
+         - service-graphs
+         - span-metrics
+    per_tenant_override_config: /conf/overrides.yaml
+  per_tenant_overrides:
+    'tenant-id':
+     metrics_generator:
+       processors:
+         - service-graphs
+         - span-metrics
+  server:
+    http_listen_port: 3100
+    log_level: info
+  storage:
+    trace:
+      backend: local
+      local:
+        path: /var/tempo/traces
+      wal:
+        path: /var/tempo/wal
+  receivers:
+    otlp:
+      protocols:
+        grpc:
+          endpoint: "0.0.0.0:4317"
+        http:
+          endpoint: "0.0.0.0:4318"
+
+tempo_configmap: |
+    memberlist:
+      cluster_label: "{{ .Release.Name }}.{{ .Release.Namespace }}"
+    multitenancy_enabled: {{ .Values.config.multitenancyEnabled }}
+    usage_report:
+      reporting_enabled: {{ .Values.config.reportingEnabled }}
+    compactor:
+      compaction:
+        block_retention: {{ .Values.config.retention }}
+    distributor:
+      receivers:
+        {{- toYaml .Values.config.receivers | nindent 8 }}
+    ingester:
+      {{- toYaml .Values.config.ingester | nindent 6 }}
+    server:
+      {{- toYaml .Values.config.server | nindent 6 }}
+    storage:
+      {{- toYaml .Values.config.storage | nindent 6 }}
+    querier:
+      {{- toYaml .Values.config.querier | nindent 6 }}
+    query_frontend:
+      {{- toYaml .Values.config.queryFrontend | nindent 6 }}
+    overrides:
+      {{- toYaml .Values.config.overrides | nindent 6 }}
+      {{- if .Values.config.metricsGenerator.enabled }}
+    metrics_generator:
+          storage:
+            path: "/tmp/tempo"
+            remote_write:
+              - url: {{ .Values.config.metricsGenerator.remoteWriteUrl }}
+      {{- end }}

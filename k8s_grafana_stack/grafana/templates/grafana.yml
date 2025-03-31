@@ -23,17 +23,27 @@ spec:
           image: {{.Values.grafana.specs.image}}
           ports:
             - containerPort: {{.Values.grafana.specs.container_port}}
-          env: {{- range .Values.grafana.env }}
-            - name: {{.name}}
-              value: {{.value}}
-          {{- end }}
+          env:
+            - name: GOMEMLIMIT
+              valueFrom:
+                resourceFieldRef:
+                  resource: limits.memory
+                  divisor: 1Mi
+            - name: GOMAXPROCS
+              valueFrom:
+                resourceFieldRef:
+                  resource: limits.cpu
+            - name: GF_FEATURE_TOGGLES_ENABLE
+              value: flameGraph traceqlSearch correlations traceQLStreaming metricsSummary traceqlEditor traceToMetrics traceToProfiles datatrails
+            - name: GF_INSTALL_PLUGINS
+              value: grafana-lokiexplore-app,grafana-exploretraces-app,grafana-pyroscope-app
           resources:
             limits:
               cpu: "500m"
-              memory: "200Mi"
+              memory: "350Mi"
             requests:
               cpu: "50m"
-              memory: "80Mi"
+              memory: "120Mi"
           imagePullPolicy: IfNotPresent
           readinessProbe:
             httpGet:

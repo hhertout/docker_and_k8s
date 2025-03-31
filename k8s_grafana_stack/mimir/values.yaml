@@ -1,0 +1,74 @@
+mimir:
+  name: mimir
+  kind: StatefulSet
+  specs:
+    replicas: 1
+    container_name: mimir
+    image: grafana/mimir:2.15.1
+    args:
+      - value: -target=all
+      - value: -config.expand-env=true
+      - value: -config.file=/etc/mimir.yaml
+    container_port: 9009
+    exposed_port: 9009
+  volume:
+    config:
+      name: mimir-config
+      configMap: mimir-config
+      path: /etc/mimir.yaml
+      subPath: mimir.yaml
+  hpa:
+    min: 1
+    max: 1
+    cpu: 120
+    memory: 120
+
+config: |
+    multitenancy_enabled: false
+
+    blocks_storage:
+      backend: filesystem
+      bucket_store:
+        sync_dir: /tmp/mimir/tsdb-sync
+      filesystem:
+        dir: /tmp/mimir/data/tsdb
+      tsdb:
+        dir: /tmp/mimir/tsdb
+
+    compactor:
+      data_dir: /tmp/mimir/compactor
+      sharding_ring:
+        kvstore:
+          store: memberlist
+
+    distributor:
+      ring:
+        instance_addr: 127.0.0.1
+        kvstore:
+          store: memberlist
+
+    ingester:
+      ring:
+        instance_addr: 127.0.0.1
+        kvstore:
+          store: memberlist
+        replication_factor: 1
+
+    ruler_storage:
+      backend: filesystem
+      filesystem:
+        dir: /tmp/mimir/rules
+
+    server:
+      http_listen_port: 9009
+      log_level: info
+
+    store_gateway:
+      sharding_ring:
+        replication_factor: 1
+
+    limits:
+    # A maximum of 100000 exemplars in memory at any one time.
+    # This setting enables exemplar processing and storage.
+      max_global_exemplars_per_user: 100000
+      ingestion_rate: 30000

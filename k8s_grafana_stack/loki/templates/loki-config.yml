@@ -1,0 +1,9 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ .Values.loki.volume.config.configMap }}
+  labels:
+    app: {{ .Values.loki.name }}
+data:
+  loki.yaml: |
+    {{ .Values.config | nindent 4 }}

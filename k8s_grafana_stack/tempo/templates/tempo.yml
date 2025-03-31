@@ -1,0 +1,74 @@
+apiVersion: apps/v1
+kind: {{ .Values.tempo.kind }}
+metadata:
+  name: {{.Values.tempo.name}}
+spec:
+  replicas: {{.Values.tempo.specs.replicas}}
+  selector:
+    matchLabels:
+      app: {{.Values.tempo.name}}
+  template:
+    metadata:
+      labels:
+        app: {{.Values.tempo.name}}
+    spec:
+      containers:
+        - name: {{.Values.tempo.specs.container_name}}
+          image: {{.Values.tempo.specs.image}}
+          ports: {{- range .Values.tempo.specs.ports }}
+            - containerPort: {{.port}}
+              name: {{.name}}
+          {{- end }}
+          args: {{- range .Values.tempo.specs.args }}
+            - {{.value}}
+          {{- end }}
+          env:
+            - name: GOMEMLIMIT
+              valueFrom:
+                resourceFieldRef:
+                  resource: limits.memory
+                  divisor: 1Mi
+            - name: GOMAXPROCS
+              valueFrom:
+                resourceFieldRef:
+                  resource: limits.cpu
+          resources:
+            limits:
+              cpu: "100m"
+              memory: "300Mi"
+            requests:
+              cpu: "50m"
+              memory: "80Mi"
+          imagePullPolicy: IfNotPresent
+          volumeMounts:
+            - name: {{.Values.tempo.volume.config.name}}
+              mountPath: {{.Values.tempo.volume.config.path}}
+              subPath: {{.Values.tempo.volume.config.subPath}}
+            - name: {{.Values.tempo.volume.override.name}}
+              mountPath: {{.Values.tempo.volume.override.path}}
+              subPath: {{.Values.tempo.volume.override.subPath}}
+          livenessProbe:
+            httpGet:
+              path: /ready
+              port: 3100
+            initialDelaySeconds: 30
+            periodSeconds: 10
+            timeoutSeconds: 5
+            failureThreshold: 3
+            successThreshold: 1
+          readinessProbe:
+            httpGet:
+              path: /ready
+              port: 3100
+            initialDelaySeconds: 20
+            periodSeconds: 10
+            timeoutSeconds: 5
+            failureThreshold: 3
+            successThreshold: 1   
+      volumes:
+        - name: {{.Values.tempo.volume.config.name}}
+          configMap:
+            name: {{.Values.tempo.volume.config.configMap}}
+        - name: {{.Values.tempo.volume.override.name}}
+          configMap:
+            name: {{.Values.tempo.volume.override.configMap}}

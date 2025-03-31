@@ -3,7 +3,7 @@ kind: {{ .Values.mimir.kind }}
 metadata:
   name: {{.Values.mimir.name}}
 spec:
-  replicas: {{.Values.mimir.replicas}}
+  replicas: {{.Values.mimir.specs.replicas}}
   selector:
     matchLabels:
       app: {{.Values.mimir.name}}
@@ -17,9 +17,19 @@ spec:
           image: {{.Values.mimir.specs.image}}
           ports:
             - containerPort: {{.Values.mimir.specs.container_port}}
-          args: {{- range .Values.mimir.args}}
+          args: {{- range .Values.mimir.specs.args}}
             - {{.value}}
             {{- end}}
+          env:
+            - name: GOMEMLIMIT
+              valueFrom:
+                resourceFieldRef:
+                  resource: limits.memory
+                  divisor: 1Mi
+            - name: GOMAXPROCS
+              valueFrom:
+                resourceFieldRef:
+                  resource: limits.cpu
           resources:
             limits:
               cpu: "100m"
@@ -28,6 +38,23 @@ spec:
               cpu: "50m"
               memory: "80Mi"
           imagePullPolicy: IfNotPresent
+          livenessProbe:
+            httpGet:
+              path: /ready
+              port: 9009
+            initialDelaySeconds: 20
+            periodSeconds: 10
+            timeoutSeconds: 3
+            failureThreshold: 3
+          readinessProbe:
+            httpGet:
+              path: /ready
+              port: 9009
+            initialDelaySeconds: 20
+            periodSeconds: 10
+            timeoutSeconds: 3
+            successThreshold: 1
+            failureThreshold: 3
           volumeMounts:
             - name: {{.Values.mimir.volume.config.name}}
               mountPath: {{.Values.mimir.volume.config.path}}

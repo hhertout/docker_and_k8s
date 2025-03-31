@@ -1,0 +1,12 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ .Values.tempo.volume.config.configMap }}
+  labels:
+    app: {{ .Values.tempo.name }}
+data:
+  overrides.yaml: |
+    overrides:
+      {{- toYaml .Values.config.per_tenant_overrides | nindent 6 }}
+  tempo.yaml: |
+    {{- tpl .Values.tempo_configmap . | nindent 4 }}

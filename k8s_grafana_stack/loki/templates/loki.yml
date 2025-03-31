@@ -3,7 +3,7 @@ kind: {{ .Values.loki.kind }}
 metadata:
   name: {{.Values.loki.name}}
 spec:
-  replicas: {{.Values.loki.replicas}}
+  replicas: {{.Values.loki.specs.replicas}}
   selector:
     matchLabels:
       app: {{.Values.loki.name}}
@@ -17,9 +17,19 @@ spec:
           image: {{.Values.loki.specs.image}}
           ports:
             - containerPort: {{.Values.loki.specs.container_port}}
-          args: {{- range .Values.loki.args}}
+          args: {{- range .Values.loki.specs.args}}
             - {{.value}}
             {{- end}}
+          env:
+            - name: GOMEMLIMIT
+              valueFrom:
+                resourceFieldRef:
+                  resource: limits.memory
+                  divisor: 1Mi
+            - name: GOMAXPROCS
+              valueFrom:
+                resourceFieldRef:
+                  resource: limits.cpu
           resources:
             limits:
               cpu: "100m"

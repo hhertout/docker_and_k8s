@@ -1,12 +1,12 @@
 apiVersion: v1
 kind: Service
 metadata:
-  name: {{ .Values.tempo.name }}-service
+  name: {{ .Values.alloy.name }}-service
 spec:
   type: ClusterIP
   selector:
-    app: {{ .Values.tempo.name }}
-  ports: {{- range .Values.tempo.specs.ports}}
+    app: {{ .Values.alloy.name }}
+  ports: {{- range .Values.alloy.specs.ports}}
     - protocol: {{ .protocol }}
       port: {{ .exposed_port }}
       targetPort: {{ .port }}

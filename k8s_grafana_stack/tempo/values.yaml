@@ -9,15 +9,11 @@ tempo:
       - port: 3100
         protocol: TCP
         exposed_port: 3100
-        name: api
-      - port: 4317
-        protocol: TCP
-        exposed_port: 4317
-        name: grpc
-      - port: 4318
-        protocol: TCP
-        exposed_port: 4318
         name: http
+      - port: 3200
+        protocol: TCP
+        exposed_port: 3200
+        name: grpc
     args:
       - value: "-config.file=/etc/tempo.yaml"
   volume:
@@ -70,6 +66,7 @@ config:
          - span-metrics
   server:
     http_listen_port: 3100
+    grpc_listen_port: 3200
     log_level: info
   storage:
     trace:

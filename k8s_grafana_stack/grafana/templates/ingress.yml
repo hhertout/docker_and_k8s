@@ -1,11 +1,11 @@
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
-  name: obs-ingress
+  name: {{.Values.grafana.name}}-ingress
   annotations:
     kubernetes.io/ingress.class: nginx
     cert-manager.io/issuer: {{.Values.tls.cert_manager.issuer}}
-    nginx.ingress.kubernetes.io/force-ssl-redirect: "false"
+    nginx.ingress.kubernetes.io/force-ssl-redirect: "true"
     nginx.ingress.kubernetes.io/rewrite-target: /
 spec:
   ingressClassName: nginx

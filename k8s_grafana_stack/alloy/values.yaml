@@ -55,8 +55,13 @@ config: |
     logging {
         level = "info"
         format = "logfmt"
+        write_to = [loki.write.default.receiver]
     }
 
+    tracing {
+        sampling_fraction = 0.1
+        write_to          = [otelcol.exporter.otlp.tempo.input]
+    }
 
     otelcol.receiver.otlp "default" {
         grpc {
@@ -83,7 +88,7 @@ config: |
 
     otelcol.exporter.otlp "tempo" {
         client {
-            endpoint = "tempo-service:3100"
+            endpoint = "tempo-service:3200"
             tls {
                 insecure = true
             }
@@ -142,7 +147,26 @@ config: |
     prometheus.exporter.self "default" {
     }
 
+    prometheus.relabel "self_monitor_relabel" {
+        forward_to = [prometheus.remote_write.mimir.receiver]
+
+
+        rule {
+            action        = "replace"
+            target_label  = "job"
+            replacement   = "alloy"
+        }
+
+        rule {
+            action        = "replace"
+            target_label  = "service_name"
+            replacement   = "alloy"
+        }
+    }
+
     prometheus.scrape "metamonitoring" {
         targets    = prometheus.exporter.self.default.targets
-        forward_to = [prometheus.remote_write.mimir.receiver]
+        forward_to = [prometheus.relabel.self_monitor_relabel.receiver]
     }
+
+    

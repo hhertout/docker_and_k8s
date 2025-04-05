@@ -53,7 +53,7 @@ alloy:
 
 config: |
     logging {
-        level = "debug"
+        level = "info"
         format = "logfmt"
     }
 
@@ -137,4 +137,12 @@ config: |
         endpoint {
             url = "http://pyroscope-service:4040"
         }
+    }
+
+    prometheus.exporter.self "default" {
+    }
+
+    prometheus.scrape "metamonitoring" {
+        targets    = prometheus.exporter.self.default.targets
+        forward_to = [prometheus.remote_write.mimir.receiver]
     }

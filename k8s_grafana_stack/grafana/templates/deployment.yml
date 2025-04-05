@@ -37,13 +37,18 @@ spec:
               value: flameGraph traceqlSearch correlations traceQLStreaming metricsSummary traceqlEditor traceToMetrics traceToProfiles datatrails
             - name: GF_INSTALL_PLUGINS
               value: grafana-lokiexplore-app,grafana-exploretraces-app,grafana-pyroscope-app
+            - name: GF_DATABASE_URL
+              valueFrom:
+                secretKeyRef:
+                  name: {{.Values.secret_name}}
+                  key: GF_DATABASE_URL
           resources:
             limits:
-              cpu: "500m"
-              memory: "350Mi"
+              cpu: "800m"
+              memory: "500Mi"
             requests:
-              cpu: "120m"
-              memory: "120Mi"
+              cpu: "160m"
+              memory: "250Mi"
           imagePullPolicy: IfNotPresent
           readinessProbe:
             httpGet:
@@ -56,16 +61,3 @@ spec:
             initialDelaySeconds: 60
             timeoutSeconds: 30
             failureThreshold: 10
-          volumeMounts:
-            - mountPath: /var/lib/grafana
-              name: {{.Values.grafana.name}}-pv
-            - name: {{.Values.grafana_provisioning.volume.config.name}}
-              mountPath: {{.Values.grafana_provisioning.volume.config.path}}
-              subPath: {{.Values.grafana_provisioning.volume.config.subPath}}
-      volumes:
-        - name: {{.Values.grafana.name}}-pv
-          persistentVolumeClaim:
-            claimName: {{.Values.grafana.volume.name}}
-        - name: {{.Values.grafana_provisioning.volume.config.name}}
-          configMap:
-            name: {{.Values.grafana_provisioning.volume.config.configMap}}

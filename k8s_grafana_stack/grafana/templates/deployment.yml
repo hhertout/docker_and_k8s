@@ -44,7 +44,7 @@ spec:
                   key: GF_DATABASE_URL
           resources:
             limits:
-              cpu: "800m"
+              cpu: "700m"
               memory: "500Mi"
             requests:
               cpu: "160m"

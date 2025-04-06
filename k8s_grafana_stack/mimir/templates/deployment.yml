@@ -32,10 +32,10 @@ spec:
                   resource: limits.cpu
           resources:
             limits:
-              cpu: "500m"
+              cpu: "1"
               memory: "350Mi"
             requests:
-              cpu: "140m"
+              cpu: "400m"
               memory: "150Mi"
           imagePullPolicy: IfNotPresent
           livenessProbe:

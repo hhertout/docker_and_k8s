@@ -1,7 +1,7 @@
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
-  name: {{ .Values.alloy.name }}-ingress
+  name: {{ .Values.alloy.name }}-grpc-ingress
   annotations:
     kubernetes.io/ingress.class: nginx
     cert-manager.io/issuer: {{ .Values.tls.cert_manager.issuer }}
@@ -11,12 +11,12 @@ metadata:
 spec:
   ingressClassName: nginx
   tls:
-    {{- range .Values.alloy.ingress.hosts }}
+    {{- range .Values.alloy.ingress.grpc.hosts }}
     - hosts:
         - {{ .host }}
       secretName: {{ .tls_secret_name }}
     {{- end }}
-  rules: {{- range .Values.alloy.ingress.hosts }}
+  rules: {{- range .Values.alloy.ingress.grpc.hosts }}
     - host: {{ .host }}
       http:
         paths:

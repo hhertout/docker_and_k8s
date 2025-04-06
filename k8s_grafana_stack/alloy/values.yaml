@@ -29,22 +29,25 @@ alloy:
       path: /etc/config.alloy
       subPath: config.alloy
   ingress:
-    hosts:
-      - host: otel-http.neryolab.com
-        path: /
-        service_name: alloy-service
-        tls_secret_name: alloy-http-tls
-        port: 4318
-      - host: otel-grpc.neryolab.com
-        path: /
-        service_name: alloy-service
-        tls_secret_name: alloy-grpc-tls
-        port: 4317
-      - host: otel-pyroscope.neryolab.com
-        path: /
-        service_name: alloy-service
-        tls_secret_name: alloy-pyroscope-tls
-        port: 9999
+    http:
+      hosts:
+        - host: otel-http.neryolab.com
+          path: /
+          service_name: alloy-service
+          tls_secret_name: alloy-http-tls
+          port: 4318
+    grpc:
+      hosts:
+        - host: otel-grpc.neryolab.com
+          path: /
+          service_name: alloy-service
+          tls_secret_name: alloy-grpc-tls
+          port: 4317
+        - host: otel-pyroscope.neryolab.com
+          path: /
+          service_name: alloy-service
+          tls_secret_name: alloy-pyroscope-tls
+          port: 9999
   hpa:
     min: 1
     max: 1
@@ -56,11 +59,6 @@ config: |
         level = "info"
         format = "logfmt"
         write_to = [loki.write.default.receiver]
-    }
-
-    tracing {
-        sampling_fraction = 0.1
-        write_to          = [otelcol.exporter.otlp.tempo.input]
     }
 
     otelcol.receiver.otlp "default" {

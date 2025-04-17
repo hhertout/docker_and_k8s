@@ -1,0 +1,29 @@
+apiVersion: apps/v1
+kind: {{ .Values.postgres.kind }}
+metadata:
+  name: {{.Values.postgres.name}}
+spec:
+  replicas: {{.Values.postgres.specs.replicas}}
+  selector:
+    matchLabels:
+      app: {{.Values.postgres.name}}
+  template:
+    metadata:
+      labels:
+        app: {{.Values.postgres.name}}
+    spec:
+      containers:
+        - name: {{.Values.postgres.specs.container_name}}
+          image: {{.Values.postgres.specs.image}}
+          imagePullPolicy: IfNotPresent
+          ports: {{- range .Values.postgres.specs.ports }}
+            - containerPort: {{.port}}
+              name: {{.name}}
+          {{- end }}
+          resources:
+            limits:
+              cpu: {{ .Values.postgres.specs.resources.limits.cpu }}
+              memory: {{ .Values.postgres.specs.resources.limits.memory }}
+            requests:
+              cpu: {{ .Values.postgres.specs.resources.requests.cpu }}
+              memory: {{ .Values.postgres.specs.resources.requests.memory }}

@@ -1,7 +1,25 @@
-comps:
-  ro:
-    image:
-  rw:
-    image:
+postgres:
+  name: pgsql
+  kind: StatefulSet
+  specs:
+    replicas: 1
+    image: postgres:15
+    container_name: pgsql
+    ports:
+      - port: 5432
+        name: pgsql
+    resources:
+      limits:
+        cpu: "200m"
+        memory: "300Mi"
+      requests:
+        cpu: "50m"
+        memory: "80Mi"
+
+  comps:
+    ro:
+    rw:
 
 pvc:
+  name: pgsql
+  storage: 1Gi

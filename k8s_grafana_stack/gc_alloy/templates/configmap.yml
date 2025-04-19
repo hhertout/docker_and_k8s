@@ -1,0 +1,9 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ .Values.alloy.volume.config.configMap }}
+  labels:
+    app: {{ .Values.alloy.name }}
+data:
+  config.alloy: |
+    {{ .Values.config | nindent 4 }}

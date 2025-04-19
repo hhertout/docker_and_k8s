@@ -1,0 +1,67 @@
+apiVersion: apps/v1
+kind: {{ .Values.alloy.kind }}
+metadata:
+  name: {{.Values.alloy.name}}
+spec:
+  replicas: {{.Values.alloy.specs.replicas}}
+  selector:
+    matchLabels:
+      app: {{.Values.alloy.name}}
+  template:
+    metadata:
+      labels:
+        app: {{.Values.alloy.name}}
+    spec:
+      containers:
+        - name: {{.Values.alloy.specs.container_name}}
+          image: {{.Values.alloy.specs.image}}
+          imagePullPolicy: IfNotPresent
+          ports: {{- range .Values.alloy.specs.ports }}
+            - containerPort: {{.port}}
+              name: {{.name}}
+          {{- end }}
+          command:
+            - alloy
+            - run
+            - --stability.level=public-preview
+            - /etc/config.alloy
+          env:
+            - name: GOMEMLIMIT
+              valueFrom:
+                resourceFieldRef:
+                  resource: limits.memory
+                  divisor: 1Mi
+            - name: GOMAXPROCS
+              valueFrom:
+                resourceFieldRef:
+                  resource: limits.cpu
+            - name: GRAFANA_CLOUD_USERNAME
+              valueFrom:
+                secretKeyRef:
+                  name: {{.Values.grafana_cloud.secret.name}}
+                  key: gc_username
+            - name: GRAFANA_CLOUD_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{.Values.grafana_cloud.secret.name}}
+                  key: gc_password
+            - name: GRAFANA_CLOUD_ENDPOINT
+              valueFrom:
+                secretKeyRef:
+                  name: {{.Values.grafana_cloud.secret.name}}
+                  key: gc_endpoint 
+          resources:
+            limits:
+              cpu: {{.Values.alloy.resources.limits.cpu}}
+              memory: {{.Values.alloy.resources.limits.memory}}
+            requests:
+              cpu: {{.Values.alloy.resources.requests.cpu}}
+              memory: {{.Values.alloy.resources.requests.memory}}
+          volumeMounts:
+            - name: {{.Values.alloy.volume.config.name}}
+              mountPath: {{.Values.alloy.volume.config.path}}
+              subPath: {{.Values.alloy.volume.config.subPath}}
+      volumes:
+        - name: {{.Values.alloy.volume.config.name}}
+          configMap:
+            name: {{.Values.alloy.volume.config.configMap}}

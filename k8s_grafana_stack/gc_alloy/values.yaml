@@ -14,6 +14,10 @@ alloy:
         protocol: TCP
         exposed_port: 4317
         name: grpc
+      - port: 12345
+        protocol: TCP
+        exposed_port: 12345
+        name: self
       - port: 4318
         protocol: TCP
         exposed_port: 4318
@@ -34,8 +38,21 @@ alloy:
         - host: otel-http.neryolab.com
           path: /
           service_name: alloy-service
+          pathType: Prefix
           tls_secret_name: alloy-http-tls
           port: 4318
+        - host: alloy.neryolab.com
+          path: /-/ready
+          pathType: Exact
+          service_name: alloy-service
+          tls_secret_name: alloy-self-tls
+          port: 12345
+        - host: alloy.neryolab.com
+          pathType: Exact
+          path: /-/healthy
+          service_name: alloy-service
+          tls_secret_name: alloy-self-tls
+          port: 12345
     grpc:
       hosts:
         - host: otel-grpc.neryolab.com

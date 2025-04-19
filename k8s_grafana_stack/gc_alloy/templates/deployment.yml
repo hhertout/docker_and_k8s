@@ -23,6 +23,7 @@ spec:
           command:
             - alloy
             - run
+            - --server.http.listen-addr=0.0.0.0:12345
             - --stability.level=public-preview
             - /etc/config.alloy
           env:

@@ -134,6 +134,9 @@ config: |
         metric_statements {
             context    = "resource"
             statements = [
+            "delete_key(attributes, \"__name__\")",
+            "delete_key(attributes, \"id\")",
+            "delete_key(attributes, \"container_tasks_state\")",
             "delete_key(attributes, \"k8s.pod.start_time\")",
             "delete_key(attributes, \"os.description\")",
             "delete_key(attributes, \"os.type\")",

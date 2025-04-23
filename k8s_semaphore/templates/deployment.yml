@@ -1,0 +1,104 @@
+apiVersion: apps/v1
+kind: {{ .Values.semaphore.kind }}
+metadata:
+  name: {{.Values.semaphore.name}}
+spec:
+  replicas: {{.Values.semaphore.specs.replicas}}
+  selector:
+    matchLabels:
+      app: {{.Values.semaphore.name}}
+  template:
+    metadata:
+      labels:
+        app: {{.Values.semaphore.name}}
+    spec:
+      containers:
+        - name: {{.Values.semaphore.specs.container_name}}
+          image: {{.Values.semaphore.specs.image}}
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: {{.Values.semaphore.specs.container_port}}
+          env:
+            - name: GOMEMLIMIT
+              valueFrom:
+                resourceFieldRef:
+                  resource: limits.memory
+                  divisor: 1Mi
+            - name: GOMAXPROCS
+              valueFrom:
+                resourceFieldRef:
+                  resource: limits.cpu
+            - name: SEMAPHORE_DB_DIALECT
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.semaphore.name }}-secrets
+                  key: db_dialect
+            - name: SEMAPHORE_DB_HOST
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.semaphore.name }}-secrets
+                  key: db_host
+            - name: SEMAPHORE_DB_NAME
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.semaphore.name }}-secrets
+                  key: db_name
+            - name: SEMAPHORE_DB_USER
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.semaphore.name }}-secrets
+                  key: db_user
+            - name: SEMAPHORE_DB_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.semaphore.name }}-secrets
+                  key: db_password
+            - name: SEMAPHORE_DB_PORT
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.semaphore.name }}-secrets
+                  key: db_port
+            - name: SEMAPHORE_ADMIN
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.semaphore.name }}-secrets
+                  key: admin_name
+            - name: SEMAPHORE_ADMIN_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.semaphore.name }}-secrets
+                  key: admin_password
+            - name: SEMAPHORE_ADMIN_NAME
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.semaphore.name }}-secrets
+                  key: admin_name
+            - name: SEMAPHORE_ADMIN_EMAIL
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.semaphore.name }}-secrets
+                  key: admin_email
+          resources:
+            limits:
+              cpu: "1"
+              memory: "350Mi"
+            requests:
+              cpu: "400m"
+              memory: "150Mi"
+          #livenessProbe:
+          #  httpGet:
+          #    path: /ready
+          #    port: 9009
+          #  initialDelaySeconds: 20
+          #  periodSeconds: 10
+          #  timeoutSeconds: 3
+          #  failureThreshold: 3
+          #readinessProbe:
+          #  httpGet:
+          #    path: /ready
+          #    port: 9009
+          #  initialDelaySeconds: 20
+          #  periodSeconds: 10
+          #  timeoutSeconds: 3
+          #  successThreshold: 1
+          #  failureThreshold: 3

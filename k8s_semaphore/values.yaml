@@ -1,0 +1,16 @@
+semaphore:
+  name: semaphore
+  kind: StatefulSet
+  specs:
+    replicas: 1
+    container_name: semaphore
+    image: semaphoreui/semaphore:v2.13.14
+    container_port: 3000
+    exposed_port: 3000
+  ingress:
+    host: semaphore.neryolab.com
+  hpa:
+    min: 1
+    max: 1
+    cpu: 120
+    memory: 120

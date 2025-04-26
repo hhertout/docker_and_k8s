@@ -16,10 +16,16 @@ spec:
         - name: {{.Values.postgres.specs.container_name}}
           image: {{.Values.postgres.specs.image}}
           imagePullPolicy: IfNotPresent
-          ports: {{- range .Values.postgres.specs.ports }}
-            - containerPort: {{.port}}
-              name: {{.name}}
-          {{- end }}
+          ports:
+            - containerPort: {{.Values.postgres.specs.container_port}}
+              name: pgsql
+          env: {{- range .Values.postgres.specs.secretEnv }}
+            - name: {{ .name }}
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .secret_name}}
+                  key: {{ .key }}
+          {{- end}}
           resources:
             limits:
               cpu: {{ .Values.postgres.specs.resources.limits.cpu }}

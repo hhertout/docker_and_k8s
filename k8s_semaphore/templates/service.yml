@@ -1,12 +1,12 @@
 apiVersion: v1
 kind: Service
 metadata:
-  name: {{ .Values.mimir.name }}-service
+  name: {{ .Values.semaphore.name }}-service
 spec:
   type: ClusterIP
   selector:
-    app: {{ .Values.mimir.name }}
+    app: {{ .Values.semaphore.name }}
   ports:
     - protocol: TCP
-      port: {{ .Values.mimir.specs.exposed_port }}
-      targetPort: {{ .Values.mimir.specs.container_port }}
+      port: {{ .Values.semaphore.specs.exposed_port }}
+      targetPort: {{ .Values.semaphore.specs.container_port }}

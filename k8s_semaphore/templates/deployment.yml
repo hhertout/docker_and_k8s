@@ -48,7 +48,7 @@ spec:
                 secretKeyRef:
                   name: {{ .Values.semaphore.name }}-secrets
                   key: db_user
-            - name: SEMAPHORE_DB_PASSWORD
+            - name: SEMAPHORE_DB_PASS
               valueFrom:
                 secretKeyRef:
                   name: {{ .Values.semaphore.name }}-secrets

@@ -1,25 +1,32 @@
+tls:
+  cert_manager:
+    issuer: letsencrypt-issuer
+
 postgres:
   name: pgsql
   kind: StatefulSet
   specs:
     replicas: 1
-    image: postgres:15
+    image: postgres:16.8
     container_name: pgsql
-    ports:
-      - port: 5432
-        name: pgsql
+    container_port: 5432
+    exposed_port: 5432
     resources:
       limits:
-        cpu: "200m"
-        memory: "300Mi"
+        cpu: "400m"
+        memory: "800Mi"
       requests:
         cpu: "50m"
         memory: "80Mi"
-
-  comps:
-    ro:
-    rw:
-
+    secretEnv:
+      - name: POSTGRES_USER
+        secret_name: pg-secrets
+        key: db_user
+      - name: POSTGRES_PASSWORD
+        secret_name: pg-secrets
+        key: db_password
 pvc:
   name: pgsql
-  storage: 1Gi
+  storage: 5Gi
+
+secret_name: pg-secrets

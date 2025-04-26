@@ -1,3 +1,7 @@
+tls:
+  cert_manager:
+    issuer: letsencrypt-issuer
+
 semaphore:
   name: semaphore
   kind: StatefulSet

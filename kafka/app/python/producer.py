@@ -8,11 +8,9 @@ user = os.getenv("KAFKA_USER")
 password = os.getenv("KAFKA_PASSWORD")
 kafka_endpoint = os.getenv("KAFKA_URI")
 
-# Configuration du producer Kafka
 conf = {
     'bootstrap.servers': kafka_endpoint,
     'receive.message.max.bytes': 2000000000,
-   # 'debug': 'broker,topic'
 }
 
 try: 
@@ -21,9 +19,9 @@ try:
     # Fonction de callback pour la confirmation d'envoi
     def delivery_report(err, msg):
         if err:
-            print(f"❌ Erreur lors de l'envoi du message: {err}")
+            print(f"❌ Error while sending the message: {err}")
         else:
-            print(f"✅ Message envoyé à {msg.topic()} [{msg.partition()}]")
+            print(f"✅ Message sent to {msg.topic()} [{msg.partition()}]")
 
     # Envoi de quelques messages
     for i in range(5):
@@ -33,7 +31,7 @@ try:
     # Attendre que tous les messages soient envoyés
     producer.flush()
 except BufferError as e:
-    print(f"Buffer plein, message non envoyé: {e}")
+    print(f"Buffer full: {e}")
 except Exception as e: 
     print(e)
 

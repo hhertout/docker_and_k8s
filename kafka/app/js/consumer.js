@@ -1,10 +1,12 @@
 const { Kafka } = require("kafkajs");
+const dotenv = require('dotenv')
+dotenv.config()
 
 process.env.KAFKA_GROUP_ID = "consumer-group"
 
 const kafka = new Kafka({
     clientId: "my-consumer",
-    brokers: ["localhost:9092"],
+    brokers: [process.env.KAFKA_URI],
 });
 
 const consumer = kafka.consumer({ groupId: process.env.KAFKA_GROUP_ID });

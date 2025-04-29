@@ -1,10 +1,12 @@
 const { Kafka } = require("kafkajs");
+const dotenv = require('dotenv')
+dotenv.config()
 
 process.env.KAFKAJS_NO_PARTITIONER_WARNING = 1
 
 const kafka = new Kafka({
     clientId: "my-producer",
-    brokers: ["localhost:9092"],
+    brokers: [process.env.KAFKA_URI],
 });
 
 const producer = kafka.producer();

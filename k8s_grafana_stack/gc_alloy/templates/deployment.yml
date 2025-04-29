@@ -50,7 +50,12 @@ spec:
               valueFrom:
                 secretKeyRef:
                   name: {{.Values.grafana_cloud.secret.name}}
-                  key: gc_endpoint 
+                  key: gc_endpoint
+            - name: PYROSCOPE_ENDPOINT
+              valueFrom:
+                secretKeyRef:
+                  name: {{.Values.grafana_cloud.secret.name}}
+                  key: pyroscope_endpoint
           resources:
             limits:
               cpu: {{.Values.alloy.resources.limits.cpu}}

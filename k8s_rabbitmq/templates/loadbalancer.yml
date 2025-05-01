@@ -1,0 +1,15 @@
+{{- if eq .Values.amqps.kind "loadbalancer" }}
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{.Values.name}}-amqps
+spec:
+  type: LoadBalancer
+  selector:
+    app: {{.Values.name}}
+  ports:
+    - port: 5671
+      targetPort: 5671
+      protocol: TCP
+      name: amqps
+{{- end }}

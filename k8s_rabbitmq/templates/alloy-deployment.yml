@@ -1,0 +1,51 @@
+{{- if .Values.monitoring.enabled }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: alloy
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: alloy
+  template:
+    metadata:
+      labels:
+        app: alloy
+    spec:
+      containers:
+        - name: alloy
+          image: grafana/alloy:v1.7.5
+          imagePullPolicy: IfNotPresent
+          command:
+            - alloy
+            - run
+            - /etc/config.alloy
+          env:
+            - name: GOMEMLIMIT
+              valueFrom:
+                resourceFieldRef:
+                  resource: limits.memory
+                  divisor: 1Mi
+            - name: GOMAXPROCS
+              valueFrom:
+                resourceFieldRef:
+                  resource: limits.cpu
+            - name: OTEL_GATEWAY_ENDPOINT
+              value: {{ .Values.monitoring.endpoint }}
+          resources:
+            limits:
+              cpu: 250m
+              memory: 120Mi
+            requests:
+              cpu: 120m
+              memory: 80Mi
+          volumeMounts:
+            - name: alloy-config-volume
+              mountPath: /etc/config.alloy
+              subPath: config.alloy
+      volumes:
+        - name: alloy-config-volume
+          configMap:
+            name: alloy-config
+{{- end }}

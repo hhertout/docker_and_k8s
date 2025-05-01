@@ -1,0 +1,12 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ .Values.name }}-configmap
+  labels:
+    app: {{ .Values.name }}
+data:
+  rabbitmq.conf: |
+    {{- .Files.Get "rabbitmq.conf" | nindent 4 }}
+  enabled_plugins: |
+    [rabbitmq_management, rabbitmq_peer_discovery_k8s, rabbitmq_prometheus].
+  

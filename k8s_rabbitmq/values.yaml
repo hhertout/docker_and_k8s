@@ -1,0 +1,46 @@
+name: rabbitmq
+
+specs:
+  replicas: 3
+  image: rabbitmq:3.13.7-management-alpine
+  container_name: pgsql
+  ports:
+    - name: amqp
+      port: 5672
+    - name: amqps
+      port: 5671
+    - name: management
+      port: 15672
+    - name: epmd
+      port: 4369
+    - name: dist
+      port: 25672
+    - name: prometheus
+      port: 15692
+  resources:
+    limits:
+      cpu: "100m"
+      memory: "150Mi"
+    requests:
+      cpu: "50m"
+      memory: "80Mi"
+
+tls:
+  cert_manager:
+    issuer: letsencrypt-issuer
+
+ingress:
+  hosts:
+    - host: mq.neryolab.com
+      path: /
+      service_name: rabbitmq-service
+      pathType: Prefix
+      tls_secret_name: rabbitmq-tls
+      port: 15672
+
+amqps:
+  kind: nodeport
+
+monitoring:
+  enabled: false
+  endpoint:

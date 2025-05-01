@@ -5,5 +5,8 @@ metadata:
   labels:
     app: {{ .Values.alloy.name }}
 data:
-  config.alloy: |
-    {{ .Values.config | nindent 4 }}
+  {{- $files := .Files }}
+  {{- range tuple "config.alloy" }}
+  {{ . }}: |-
+    {{ $files.Get . }}    
+  {{- end }}

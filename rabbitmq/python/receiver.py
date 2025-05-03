@@ -16,7 +16,6 @@ parameters = pika.ConnectionParameters(
 
 def callback(ch, method, properties, body):
     try:
-        ch.basic_ack(delivery_tag=method.delivery_tag)
         print(f"Message received: {body.decode()}")
     except Exception as e:
         ch.basic_nack(delivery_tag=method.delivery_tag, requeue=True)
@@ -26,13 +25,9 @@ try:
     connection = pika.BlockingConnection(parameters)
     channel = connection.channel()
 
-    channel.queue_declare(
-        queue='ma_file_quorum',
-        durable=True,
-        arguments={'x-queue-type': 'quorum'}
-    )
+    channel.queue_declare(queue='test', durable=True)
 
-    channel.basic_consume(queue='test2', on_message_callback=callback, auto_ack=True)
+    channel.basic_consume(queue='test', on_message_callback=callback, auto_ack=True)
 
     print("⏳ Waiting for messages...")
     channel.start_consuming()

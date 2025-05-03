@@ -3,9 +3,9 @@ const dotenv = require('dotenv')
 
 dotenv.config()
 
-const { MQ_ENDPOINT, MQ_USER, MQ_PASSWORD } = process.env
+const { MQ_ENDPOINT, MQ_USER, MQ_PASSWORD, MQ_PORT } = process.env
 
-const RABBITMQ_URL = `amqp://${MQ_USER}:${MQ_PASSWORD}@${MQ_ENDPOINT}`
+const RABBITMQ_URL = `amqp://${MQ_USER}:${MQ_PASSWORD}@${MQ_ENDPOINT}:${MQ_PORT}`
 
 async function testRabbitMQ() {
     try {

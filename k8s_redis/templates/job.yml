@@ -1,0 +1,45 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: {{.Values.name}}-cluster-init
+  annotations:
+    "helm.sh/hook": pre-upgrade
+    "helm.sh/hook-delete-policy": before-hook-creation
+spec:
+  backoffLimit: 3
+  template:
+    spec:
+      restartPolicy: OnFailure
+      containers:
+        - name: {{.Values.name}}-init
+          image: {{.Values.image}}
+          resources:
+            requests:
+              cpu: 100m
+              memory: 64Mi
+            limits:
+              cpu: 200m
+              memory: 128Mi
+          command:
+            - sh
+            - -c
+            - |
+              echo "Waiting for Redis deployment..."
+              for i in 0 1 2 3 4 5; do
+                while ! redis-cli -h redis-$i.redis ping; do
+                  echo "redis-$i is not ready..."; sleep 2
+                done
+                
+                echo "reset cluster configuration..."
+                redis-cli -h redis-$i.redis FLUSHALL
+                redis-cli -h redis-$i.redis CLUSTER RESET HARD
+              done
+              echo "Pods are ready, creating cluster..."
+              yes yes | redis-cli --cluster create \
+                redis-0.redis:6379 \
+                redis-1.redis:6379 \
+                redis-2.redis:6379 \
+                redis-3.redis:6379 \
+                redis-4.redis:6379 \
+                redis-5.redis:6379 \
+                --cluster-replicas 1
